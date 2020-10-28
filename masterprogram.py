@@ -8,6 +8,26 @@ import ConfigParser
 import csv
 from shutil import copyfile
 import filecmp
+import smbus
+import time
+#setup SHT30
+
+
+# Get I2C bus
+bus = smbus.SMBus(1)
+
+# SHT30 address, 0x44(68)
+# Send measurement command, 0x2C(44)
+#		0x06(06)	High repeatability measurement
+bus.write_i2c_block_data(0x44, 0x2C, [0x06])
+
+time.sleep(0.5)
+
+# SHT30 address, 0x44(68)
+# Read data back from 0x00(00), 6 bytes
+# cTemp MSB, cTemp LSB, cTemp CRC, Humididty MSB, Humidity LSB, Humidity CRC
+
+
 
 
 #this python script should be run with a config.txt argument that defines two variables. This config file will be edited on github to change the settings of the program
@@ -53,7 +73,7 @@ c =(open(outFile, 'wb'))
 wrtr = csv.writer(c)
 
 #write a header column in master data file. this will only happen once at the start of the program and any time the porogram restarts it will make a new one.
-wrtr.writerow(["TimeStamp", "Temp", "Humidity", "Ventilation"])
+wrtr.writerow(["TimeStamp", "cTemp", "fTemp", "Humidity", "Ventilation"])
 c.flush()
 
 #run an infinite loop that will turn ventilation on and off based on settings
@@ -62,12 +82,13 @@ while True:
     if filecomp(configpath, configcopy)==False:
         readinput(inputFile)
         configureSettings()
+        data = bus.read_i2c_block_data(0x44, 0x00, 6)
 
-    #read Temperature
-    currtemp=
-    #read humidity
-    currhum=
-    #make timeStamp
+# Convert the data
+    cTemp = ((((data[0] * 256.0) + data[1]) * 175) / 65535.0) - 45
+    fTemp = cTemp * 1.8 + 32
+    Humidity = 100 * (data[3] * 256 + data[4]) / 65535.0
+
     timeStamp=time.strftime("%Y-%m-%d %H:%M:%S", now)
 
     #turn ventilation on if it's off, then sleep for the on time
@@ -75,7 +96,7 @@ while True:
         GPIO.output(23, True)
         ventilation="ON"
         #write data
-        wrtr.writerow([timeStamp, currtemp, currhum, ventilation])
+        wrtr.writerow([timeStamp, cTemp, fTemp, Humidity, ventilation])
         c.flush()
         #sleep
         time.sleep(ventilation_on_time*60)
@@ -86,7 +107,7 @@ while True:
         GPIO.output(23,False)
         ventilation="OFF"
         #write data
-        wrtr.writerow([timeStamp, currtemp, currhum, ventilation])
+        wrtr.writerow([timeStamp, cTemp, fTemp, Humidity, ventilation])
         c.flush()
         #sleep
         time.sleep(ventilation_off_time*60)
