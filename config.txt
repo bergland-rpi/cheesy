@@ -1,0 +1,2 @@
+ventilation_on_time=15
+ventilation_off_time=15
