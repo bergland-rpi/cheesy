@@ -1,2 +1,3 @@
-ventilation_on_time=15
-ventilation_off_time=15
+[settings]
+ventilation_on_time=1
+ventilation_off_time=1
