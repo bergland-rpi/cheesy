@@ -1,3 +1,3 @@
 [settings]
-ventilation_on_time=5
-ventilation_off_time=5
+ventilation_on_time=10
+ventilation_off_time=10
