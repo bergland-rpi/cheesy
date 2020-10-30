@@ -1,0 +1,22 @@
+Program automatically starts ~30 seconds after the Rpi boots
+
+/home/pi/cheesy/masterprogram.py is the main program. To start it manually, in the /home/pi/cheesy directory run:
+python masterprogram.py config.txt 
+
+Config.txt has the settings for time on and time off (in minutes) – can edit this on github to change, or edit the file directly on Pi.
+
+Every time the program starts, it will make a data file in /home/pi/cheesy/ called log.[YYYY-MM-DD].txt. It will add temperature/humidity data to that file every time the ventilation turns on or off.
+
+A cronjob runs every hour to check that the program is still running and pull the most recent files from github. If the config file has changed, then python program will update its settings and continue to run with new settings, still saving in the same log file. 
+
+
+Wire connections (see photo next page):
+SHT30 temp/humidity probe:
+Red 3.3V (any)
+Green: GPIO2
+Yellow: GPIO3
+Black: Ground
+
+Powerswitch:
+1 (+ in): GPIO 23
+2 (- in): Ground
